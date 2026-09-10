@@ -1,0 +1,44 @@
+using UnityEngine;
+
+public class GameBootstrap : MonoBehaviour
+{
+    [SerializeField] private Player _player;
+    [SerializeField] private LootManager _lootManager;
+    [SerializeField] private GameStateManager _gameStateManager;
+    [SerializeField] private EffectManager _effectManager;
+    [SerializeField] private CardManager _cardManager;
+    [SerializeField] private EnemySpawner _enemySpawner;
+    [SerializeField] private TopIconManager _topIconManager;
+    [SerializeField] private LevelupManager _levelupManager;
+    [SerializeField] private GameManager _gameManager;
+    [SerializeField] private SaveManager _saveManager;
+    [SerializeField] private ChapterManager _waweManager;
+    [SerializeField] private ProgressCardsManager _progressCardsManager;
+    [SerializeField] private FxManager _fxManager;
+
+    private void Awake()
+    {
+#if UNITY_ANDROID || UNITY_IOS
+        Application.targetFrameRate = 60;
+#endif
+        _gameManager.Init(_gameStateManager, _enemySpawner, _player, _waweManager, _saveManager);
+        _player.Init();
+        _effectManager.Init(_enemySpawner, _cardManager, _topIconManager, _player, _fxManager);
+        _cardManager.Init(_effectManager, _gameStateManager, _enemySpawner);
+        _gameStateManager.Init();
+        _lootManager.Init();
+        _levelupManager.Init();
+        _saveManager.Init();
+        _progressCardsManager.Init(_player, _saveManager);
+
+        _saveManager.Register(_player.Inventory);
+        _saveManager.Register(_player.Stats);
+        _saveManager.Register(_waweManager);
+        _saveManager.Register(_progressCardsManager);
+        _saveManager.Load();
+
+        _player.Health.ApplyStats();
+
+        _enemySpawner.Init(_lootManager, _player, _waweManager, _fxManager);
+    }
+}
